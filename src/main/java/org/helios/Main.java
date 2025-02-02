@@ -1,26 +1,102 @@
 package org.helios;
 
+import org.helios.page_replacer.AbstractPageReplacer;
+import org.helios.page_replacer.NRUPageReplacer;
+
 import java.util.*;
 
 public class Main {
 
     private static SwapMemory swapMemory = new SwapMemory();
     private static RandomAccessMemory randomAccessMemory = new RandomAccessMemory();
+    private static Map<Integer, Integer> MMU = new HashMap<>();
+    private static AbstractPageReplacer pageReplacer = new NRUPageReplacer(randomAccessMemory, swapMemory, MMU);
+    private static  final int NUMBER_INSTRUCTIONS = 1000;
+
+
+
 
     public static void main(String[] args) {
-        randomAccessMemory.populateFrom(swapMemory, getRandomLines());
+        // Populate Memory And Update MMU
+        int randomMemoryLine = 0;
+        for(int line : getRandomLines()) {
+            randomAccessMemory.setLine(randomMemoryLine, swapMemory.getLine(line));
+            MMU.put(randomMemoryLine, line);
+            pageReplacer.updateArrivalsPage(randomMemoryLine);
+            randomMemoryLine++;
 
-        for (int i = 0; i < randomAccessMemory.getRowCount(); i++) {
-            System.out.println(Arrays.toString(randomAccessMemory.getLineAsPage(i).toArray()));
+        }
+        System.out.println(MMU);
+
+
+
+        printMemory(randomAccessMemory);
+        System.out.println("\n");
+        printMemory(swapMemory);
+        // Ao Selecionar o Alooritimo, executa 1000 Instruções Aleatorias:
+        for (int countInstrunction = 0; countInstrunction < NUMBER_INSTRUCTIONS; countInstrunction++) {
+
+            // A cada 10 Intruções rodadas, reseta o bit de acesso de todas as paginas da RAM
+            if (countInstrunction % 10 == 0) {
+                resetAccessBit();
+            }
+            runInstruction();
         }
 
         System.out.println("\n");
 
-        for (int i = 0; i < swapMemory.getRowCount(); i++) {
-            System.out.println(Arrays.toString(swapMemory.getLineAsPage(i).toArray()));
+        printMemory(randomAccessMemory);
+        System.out.println("\n");
+        printMemory(swapMemory);
+
+
+
+
+    }
+
+
+    private static void printMemory(AbstractMemory memory) {
+        for (int i = 0; i < memory.getRowCount(); i++) {
+            System.out.println(Arrays.toString(memory.getLineAsPage(i).toArray()));
         }
     }
 
+    private static void resetAccessBit() {
+        for (int i = 0; i < randomAccessMemory.getRowCount(); i++) {
+            MemoryPage page = randomAccessMemory.getLineAsPage(i);
+            page.setAccessBit(0);
+
+        }
+    }
+
+    private static void runInstruction(){
+        Random random = new Random();
+        boolean hasInstruction = false;
+        int randomInstruction =  random.nextInt(1, 100);
+        for (int i = 0; i < randomAccessMemory.getRowCount(); i++) {
+            MemoryPage page = randomAccessMemory.getLineAsPage(i);
+            // Instrução encontrada dentro da memoria Ram:
+            if (page.getInstruction() == randomInstruction){
+                // Seta o Bit de Acesso para 1
+                page.setAccessBit(1);
+
+                // 50% Porcento de chance de ser verdadeiro
+                // Caso Verdade adiciona um valor em data, e seta bit de moficação para 1
+                if (random.nextInt(100) < 50){
+                    page.setData(page.getData() + 1);
+                    page.setModificationBit(1);
+
+                }
+                hasInstruction = true;
+                break;
+            }
+        }
+        // Caso não instrução não esteja na memoria ram, Ele fara a busca dentro de swap
+        if (!hasInstruction){
+            pageReplacer.replacePage(randomInstruction);
+        }
+
+    }
 
     private static List<Integer> getRandomLines() {
         int sizeY = swapMemory.getRowCount();
