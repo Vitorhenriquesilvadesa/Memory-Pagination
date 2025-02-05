@@ -1,39 +1,39 @@
 package org.helios;
 
-import org.helios.page_replacer.AbstractPageReplacer;
-import org.helios.page_replacer.NRUPageReplacer;
+import org.helios.page_replacer.*;
 
 import java.util.*;
+
+import static org.helios.page_replacer.PageReplacerType.CLOCK;
 
 public class Main {
 
     private static SwapMemory swapMemory = new SwapMemory();
     private static RandomAccessMemory randomAccessMemory = new RandomAccessMemory();
     private static Map<Integer, Integer> MMU = new HashMap<>();
-    private static AbstractPageReplacer pageReplacer = new NRUPageReplacer(randomAccessMemory, swapMemory, MMU);
     private static  final int NUMBER_INSTRUCTIONS = 1000;
-
-
+    private static PageReplacerWrapper pageReplacer = new PageReplacerWrapper(CLOCK, randomAccessMemory, swapMemory);
 
 
     public static void main(String[] args) {
+        
         // Populate Memory And Update MMU
         int randomMemoryLine = 0;
         for(int line : getRandomLines()) {
             randomAccessMemory.setLine(randomMemoryLine, swapMemory.getLine(line));
             MMU.put(randomMemoryLine, line);
-            pageReplacer.updateArrivalsPage(randomMemoryLine);
+            pageReplacer.addPage(randomMemoryLine);
             randomMemoryLine++;
 
         }
-        System.out.println(MMU);
-
 
 
         printMemory(randomAccessMemory);
         System.out.println("\n");
         printMemory(swapMemory);
         // Ao Selecionar o Alooritimo, executa 1000 Instruções Aleatorias:
+        
+        
         for (int countInstrunction = 0; countInstrunction < NUMBER_INSTRUCTIONS; countInstrunction++) {
 
             // A cada 10 Intruções rodadas, reseta o bit de acesso de todas as paginas da RAM
@@ -44,7 +44,6 @@ public class Main {
         }
 
         System.out.println("\n");
-
         printMemory(randomAccessMemory);
         System.out.println("\n");
         printMemory(swapMemory);

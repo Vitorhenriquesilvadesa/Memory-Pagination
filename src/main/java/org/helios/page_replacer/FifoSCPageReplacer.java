@@ -9,21 +9,27 @@ import java.util.Map;
 import java.util.Queue;
 
 public class FifoSCPageReplacer extends AbstractPageReplacer{
-    public FifoSCPageReplacer(RandomAccessMemory memory, SwapMemory swapMemory, Map<Integer, Integer> MMU) {
-        super(memory, swapMemory, MMU);
+    public FifoSCPageReplacer(RandomAccessMemory memory, SwapMemory swapMemory) {
+        super(memory, swapMemory);
     }
-    private Queue<Integer> pageLineQueue = new LinkedList<>();
+
+    @Override
+    public void addPage(int memoryPageLine) {
+        pageLineQueue.add(memoryPageLine);
+    }
+
+    private final Queue<Integer> pageLineQueue = new LinkedList<>();
 
     @Override
     public void updateArrivalsPage(int memoryPageLine) {
-        pageLineQueue.add(memoryPageLine);
+        addPage(memoryPageLine);
     }
 
     @Override
     public int chooseUselessPage() {
 
         for (int i = 0; i < pageLineQueue.size(); i++) {
-            int pageLine = pageLineQueue.poll();pageLineQueue.poll();
+            int pageLine = pageLineQueue.poll();
             MemoryPage memoryPage = memory.getLineAsPage(pageLine);
 
             if (memoryPage.getAccessBit() == 1){
@@ -36,6 +42,6 @@ public class FifoSCPageReplacer extends AbstractPageReplacer{
         }
 
 
-        return 0;
+        return pageLineQueue.poll();
     }
 }

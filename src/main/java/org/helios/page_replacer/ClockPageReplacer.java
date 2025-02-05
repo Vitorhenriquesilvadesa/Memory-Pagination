@@ -8,80 +8,72 @@ import java.util.Map;
 
 public class ClockPageReplacer extends AbstractPageReplacer {
 
-    CircularQueue<Integer> queue = new CircularQueue<>();
-    private Node<Integer> current;
-    private boolean done;
+    private Node head;
+    private Node tail;
 
-    public ClockPageReplacer(RandomAccessMemory memory, SwapMemory swapMemory, Map<Integer, Integer> MMU) {
-        super(memory, swapMemory, MMU);
+    private Node current;
+    private int queueSize = 0;
+
+    public ClockPageReplacer(RandomAccessMemory memory, SwapMemory swapMemory) {
+        super(memory, swapMemory);
+    }
+
+    private void enqueue(int pageLine) {
+        if(head == null) {
+            head = new Node(pageLine);
+            tail = head;
+            head.next = tail;
+            current = head;
+        }
+        else if (tail == head){
+            tail = new Node(pageLine);
+            head.next = tail;
+        }
+        else {
+            Node next = new Node(pageLine);
+            tail.next = next;
+            tail = next;
+        }
+        tail.next = head;
+        queueSize++;
+    }
+
+    @Override
+    public void addPage(int memoryPageLine) {
+        enqueue(memoryPageLine);
     }
 
     @Override
     public void updateArrivalsPage(int memoryPageLine) {
-
-        if(done){
-            current.data = memoryPageLine;
+            current.pageLine = memoryPageLine;
             current = current.next;
-            done = false;
-        }
-        else {
-            queue.enqueue(memoryPageLine);
-        }
-        if (current == null) {
-            current = queue.head;
-        }
     }
 
     @Override
     public int chooseUselessPage() {
 
-        for (int i = 0; i < queue.size; i++) {
-            MemoryPage page = memory.getLineAsPage(current.data);
+        for (int i = 0; i < queueSize; i++) {
+            MemoryPage page = memory.getLineAsPage(current.pageLine);
             if (page.getAccessBit() == 1){
                 page.setAccessBit(0);
                 current = current.next;
             }
             else{
-                done = true;
-                return current.data;
+                return current.pageLine;
             }
             current = current.next;
         }
-        return queue.head.data;
+        return current.pageLine;
     }
 
 
+    private static class Node {
+        private Node next;
+        private int pageLine;
 
-
-
-
-    private static class CircularQueue<T> {
-        private Node<T> head;
-        private Node<T> tail;
-        private int size = 0;
-
-        public void enqueue(T element) {
-            if (head == null) {
-                head = new Node<>(element, null);
-            }
-            else if (tail == null) {
-                tail = new Node<>(element, null);
-                head.next = tail;
-            }
-            else {
-                tail.next = new Node<>(element, null);
-                tail = tail.next;
-                tail.next = head;
-            }
-            size++;
-        }
-    }
-    private static class Node<T> {
-        private Node<T> next;
-        private T data;
-        public Node(final T data, final Node<T> next) {
-            this.data = data;
-            this.next = next;
+        private Node(int pageLine) {
+            this.next = null;
+            this.pageLine = pageLine;
         }
     }
 }

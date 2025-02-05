@@ -10,13 +10,18 @@ import java.util.Queue;
 public class FifoPageReplacer extends AbstractPageReplacer{
     private Queue<Integer> linePages = new LinkedList<>();
 
-    public FifoPageReplacer(RandomAccessMemory memory, SwapMemory swapMemory, Map<Integer, Integer> MMU) {
-        super(memory, swapMemory, MMU);
+    public FifoPageReplacer(RandomAccessMemory memory, SwapMemory swapMemory) {
+        super(memory, swapMemory);
     }
 
     @Override
-    public void updateArrivalsPage(int pageLine) {
-        linePages.add(pageLine);
+    public void addPage(int memoryPageLine) {
+        linePages.add(memoryPageLine);
+    }
+
+    @Override
+    protected void updateArrivalsPage(int pageLine) {
+        addPage(pageLine);
     }
 
     @Override

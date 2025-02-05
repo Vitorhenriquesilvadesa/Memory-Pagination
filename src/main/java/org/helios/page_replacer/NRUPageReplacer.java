@@ -10,15 +10,19 @@ import java.util.Queue;
 
 public class NRUPageReplacer extends AbstractPageReplacer{
     Queue<Integer> pageLineTable = new LinkedList<>();
-    public NRUPageReplacer(RandomAccessMemory memory, SwapMemory swapMemory, Map<Integer, Integer> MMU) {
-        super(memory, swapMemory, MMU);
+    public NRUPageReplacer(RandomAccessMemory memory, SwapMemory swapMemory) {
+        super(memory, swapMemory);
+    }
+
+    @Override
+    public void addPage(int memoryPageLine) {
+        pageLineTable.add(memoryPageLine);
     }
 
     @Override
     public void updateArrivalsPage(int memoryPageLine) {
-        pageLineTable.add(memoryPageLine);
+        addPage(memoryPageLine);
     }
-
 
 
     @Override
@@ -28,17 +32,23 @@ public class NRUPageReplacer extends AbstractPageReplacer{
             MemoryPage page = memory.getLineAsPage(pageLine);
             int pageClass = getPageClass(page);
             // Classe mais baixa, já retorna a linha da pagina:
-            if (pageClass == 0) return pageLine;
+            if (pageClass == 0) {
+                pageLineTable.remove(pageLine);
+                return pageLine;
+            }
             pageClasses[pageClass] = pageLine;
         }
 
         // Seleciona o Primeiro de menor classe existente e retorna
         for (int i = 0; i < 3; i++) {
             int uselessPage = pageClasses[i];
-            if (uselessPage != 0) return uselessPage;
+            if (uselessPage != 0)  {
+                pageLineTable.remove(uselessPage);
+                return  uselessPage;
+            };
         }
         // Caso nenhum atenda, retorna o primeiro da fila
-        return pageLineTable.peek();
+        return pageLineTable.poll();
         }
 
     private int getPageClass(MemoryPage page) {
