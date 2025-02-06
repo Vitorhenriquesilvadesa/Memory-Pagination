@@ -12,9 +12,7 @@ public class Main {
     private static RandomAccessMemory randomAccessMemory = new RandomAccessMemory();
     private static Map<Integer, Integer> MMU = new HashMap<>();
     private static  final int NUMBER_INSTRUCTIONS = 1000;
-    private static PageReplacerWrapper pageReplacer = new PageReplacerWrapper(CLOCK, randomAccessMemory, swapMemory);
-
-
+    private static PageReplacerProxy pageReplacer = new PageReplacerProxy(CLOCK, randomAccessMemory, swapMemory);
     public static void main(String[] args) {
         
         // Populate Memory And Update MMU

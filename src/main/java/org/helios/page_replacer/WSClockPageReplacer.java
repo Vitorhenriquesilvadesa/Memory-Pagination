@@ -4,7 +4,6 @@ import org.helios.MemoryPage;
 import org.helios.RandomAccessMemory;
 import org.helios.SwapMemory;
 
-import java.util.Map;
 
 public class WSClockPageReplacer extends AbstractPageReplacer {
     private Node head;

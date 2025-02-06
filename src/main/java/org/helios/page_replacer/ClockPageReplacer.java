@@ -1,10 +1,8 @@
 package org.helios.page_replacer;
-
 import org.helios.MemoryPage;
 import org.helios.RandomAccessMemory;
 import org.helios.SwapMemory;
 
-import java.util.Map;
 
 public class ClockPageReplacer extends AbstractPageReplacer {
 

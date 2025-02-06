@@ -7,6 +7,4 @@ public enum PageReplacerType {
     CLOCK,
     NRU,
     WS_CLOCK,
-
-
 }

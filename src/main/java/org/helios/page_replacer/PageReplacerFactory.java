@@ -3,11 +3,10 @@ package org.helios.page_replacer;
 import org.helios.RandomAccessMemory;
 import org.helios.SwapMemory;
 
-import java.util.Random;
 
-public class PageReplacerWrapper {
-    private AbstractPageReplacer pageReplacer;
-    public PageReplacerWrapper(PageReplacerType type, RandomAccessMemory memory, SwapMemory swapMemory) {
+public class PageReplacerFactory {
+    public static AbstractPageReplacer create(PageReplacerType type, RandomAccessMemory memory, SwapMemory swapMemory) {
+        AbstractPageReplacer pageReplacer = null;
         switch (type) {
             case NRU -> pageReplacer = new NRUPageReplacer(memory, swapMemory);
             case FIFO -> pageReplacer = new FifoPageReplacer(memory, swapMemory);
@@ -16,13 +15,6 @@ public class PageReplacerWrapper {
             case LRU -> pageReplacer = new LRUPageReplacer(memory, swapMemory);
             case WS_CLOCK -> pageReplacer = new WSClockPageReplacer(memory, swapMemory);
         }
-    }
-    
-    public void addPage(final int pageLine) {
-        pageReplacer.addPage(pageLine);
-    }
-
-    public void replacePage(final int instruction) {
-        pageReplacer.replacePage(instruction);
+        return pageReplacer;
     }
 }

@@ -1,11 +1,8 @@
 package org.helios.page_replacer;
-
 import org.helios.MemoryPage;
 import org.helios.RandomAccessMemory;
 import org.helios.SwapMemory;
-
 import java.util.ArrayList;
-import java.util.Map;
 
 public class LRUPageReplacer extends AbstractPageReplacer{
     private final ArrayList<Integer> pageLineList = new ArrayList<>();
@@ -31,7 +28,7 @@ public class LRUPageReplacer extends AbstractPageReplacer{
         for (int i = 0; i < pageLineList.size(); i++) {
             int currentPageLine = pageLineList.get(i);
             MemoryPage memoryPage = memory.getLineAsPage(i);
-            if (memoryPage.getAgingTime() > lessTime) {
+            if (memoryPage.getAgingTime() < lessTime) {
                 lessTime = memoryPage.getAgingTime();
                 pageLine = currentPageLine;
             }

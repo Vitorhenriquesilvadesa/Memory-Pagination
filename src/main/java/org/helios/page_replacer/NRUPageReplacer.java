@@ -1,11 +1,8 @@
 package org.helios.page_replacer;
-
 import org.helios.MemoryPage;
 import org.helios.RandomAccessMemory;
 import org.helios.SwapMemory;
-
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
 
 public class NRUPageReplacer extends AbstractPageReplacer{
