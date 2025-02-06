@@ -88,7 +88,7 @@ public class Main {
                 break;
             }
         }
-        // Caso não instrução não esteja na memoria ram, Ele fara a busca dentro de swap
+        // Caso não instrução não esteja na memoria ram, Ele fara a busca dentro de swap.
         if (!hasInstruction){
             pageReplacer.replacePage(randomInstruction);
         }
